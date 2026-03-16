@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Depression Precedes Social Disconnection — CHARLS 2015–2020</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:   #1F3864;
+  --teal:   #2D7868;
+  --plum:   #7A4E72;
+  --red:    #C13535;
+  --blue:   #1A5FA0;
+  --green:  #0F6E56;
+  --green2: #1D9E75;
+  --orange: #C4641C;
+  --grey:   #888780;
+  --amber:  #8A5E00;
+  --ink:    #1A1816;
+  --muted:  #6B6860;
+  --border: #E0DDD6;
+  --bg:     #F8F6F1;
+  --card:   #FFFFFF;
+  --stripe: #F3F1EC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'DM Sans',sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  font-size:15px;
+  line-height:1.65;
+}
+
+/* ── HERO ── */
+.hero{
+  background:var(--navy);
+  padding:72px 48px 56px;
+  position:relative;
+  overflow:hidden;
+}
+.hero::before{
+  content:'';
+  position:absolute;inset:0;
+  background:
+    radial-gradient(ellipse 60% 80% at 80% 50%, #2C5F8A44, transparent),
+    radial-gradient(ellipse 40% 60% at 10% 80%, #1D9E7522, transparent);
+  pointer-events:none;
+}
+.hero-inner{max-width:860px;margin:0 auto;position:relative}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);
+  border-radius:20px;
+  padding:5px 14px;
+  font-size:11px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;
+  color:rgba(255,255,255,.75);
+  margin-bottom:24px;
+}
+.hero h1{
+  font-family:'DM Serif Display',serif;
+  font-size:clamp(1.7rem,3vw,2.6rem);
+  color:#fff;
+  line-height:1.2;
+  margin-bottom:16px;
+  font-weight:400;
+}
+.hero h1 em{color:#7EC8E3;font-style:italic}
+.hero-meta{
+  font-size:13px;color:rgba(255,255,255,.6);
+  margin-bottom:28px;
+  display:flex;flex-wrap:wrap;gap:6px 20px;
+}
+.hero-meta span{display:flex;align-items:center;gap:5px}
+.hero-findings{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+  gap:12px;margin-top:32px;
+}
+.hf{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.15);
+  border-radius:10px;
+  padding:16px 18px;
+}
+.hf-num{
+  font-family:'DM Mono',monospace;
+  font-size:1.8rem;font-weight:500;
+  color:#7EC8E3;
+  line-height:1;
+  margin-bottom:6px;
+}
+.hf-label{font-size:11.5px;color:rgba(255,255,255,.65);line-height:1.4}
+
+/* ── NAV ── */
+nav{
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+}
+.nav-inner{
+  max-width:920px;margin:0 auto;
+  display:flex;gap:0;
+  overflow-x:auto;
+}
+.nav-btn{
+  padding:13px 20px;
+  font-size:13px;font-weight:500;
+  border:none;background:none;
+  color:var(--muted);cursor:pointer;
+  border-bottom:2.5px solid transparent;
+  white-space:nowrap;
+  transition:all .15s;
+}
+.nav-btn.active,.nav-btn:hover{color:var(--navy);border-bottom-color:var(--navy)}
+
+/* ── SECTIONS ── */
+section{
+  max-width:920px;margin:0 auto;
+  padding:52px 24px;
+}
+.sec-head{
+  font-family:'DM Serif Display',serif;
+  font-size:1.6rem;font-weight:400;
+  color:var(--navy);
+  margin-bottom:8px;
+}
+.sec-sub{
+  font-size:13.5px;color:var(--muted);
+  margin-bottom:32px;
+  max-width:620px;
+}
+.divider{height:1px;background:var(--border);margin:0 24px}
+
+/* ── TOGGLE CONTROLS ── */
+.ctrl-row{
+  display:flex;flex-wrap:wrap;gap:10px;
+  margin-bottom:28px;
+  align-items:center;
+}
+.ctrl-label{
+  font-size:12px;font-weight:500;
+  color:var(--muted);letter-spacing:.4px;text-transform:uppercase;
+  margin-right:4px;
+}
+.toggle-group{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tg-btn{
+  padding:8px 18px;
+  font-family:'DM Sans',sans-serif;
+  font-size:13px;font-weight:500;
+  border:none;background:none;
+  cursor:pointer;color:var(--muted);
+  transition:all .15s;
+  white-space:nowrap;
+}
+.tg-btn.active{background:var(--navy);color:#fff}
+
+/* ── CLPM DIAGRAM ── */
+.diagram-wrap{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:28px 20px 20px;
+  overflow:visible;
+}
+#clpm-svg{width:100%;height:auto;display:block}
+
+/* ── FOREST PLOT ── */
+.forest-wrap{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px 20px;
+}
+#fp-svg{width:100%;height:auto;display:block}
+
+/* ── FIT CARDS ── */
+.fit-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:28px;
+}
+.fit-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px 20px;
+}
+.fit-card-title{
+  font-size:11px;font-weight:500;
+  letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.fit-dot{
+  width:10px;height:10px;border-radius:50%;
+  display:inline-block;
+}
+.fit-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:5px 0;
+  border-bottom:1px solid var(--stripe);
+  font-size:13px;
+}
+.fit-row:last-child{border:none}
+.fit-val{font-family:'DM Mono',monospace;font-weight:500;font-size:12.5px}
+.good{color:var(--green)}
+.ok{color:var(--amber)}
+
+/* ── KEY FINDINGS TABLE ── */
+.kf-table{
+  width:100%;border-collapse:collapse;
+  font-size:13.5px;
+}
+.kf-table th{
+  text-align:left;padding:10px 14px;
+  font-size:11px;font-weight:500;
+  letter-spacing:.5px;text-transform:uppercase;
+  color:var(--muted);
+  border-bottom:2px solid var(--navy);
+}
+.kf-table td{
+  padding:11px 14px;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+.kf-table tr:last-child td{border:none}
+.kf-table tr.stripe td{background:var(--stripe)}
+.path-dom{color:var(--red);font-weight:500}
+.path-rev{color:var(--blue)}
+.path-emg{color:var(--green2);font-weight:500}
+.beta-pill{
+  display:inline-block;
+  padding:2px 9px;
+  border-radius:12px;
+  font-family:'DM Mono',monospace;
+  font-size:12px;font-weight:500;
+}
+.bp-red{background:#FEF0F0;color:var(--red)}
+.bp-blue{background:#EEF4FF;color:var(--blue)}
+.bp-green{background:#E8F8F2;color:var(--green)}
+.bp-grey{background:#F3F1EC;color:var(--grey)}
+
+/* ── MECHANISM BOX ── */
+.mech-grid{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.mech-panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+.mech-header{
+  padding:13px 18px;
+  font-size:12px;font-weight:500;
+  color:#fff;
+}
+.mech-body{padding:18px}
+.mech-body svg{width:100%;height:auto;display:block}
+
+/* ── FOOTNOTES ── */
+.footnote{
+  font-size:12px;color:var(--muted);
+  line-height:1.6;
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid var(--border);
+}
+
+/* ── FOOTER ── */
+footer{
+  background:var(--navy);
+  padding:40px 24px;
+  text-align:center;
+  color:rgba(255,255,255,.5);
+  font-size:12.5px;
+  line-height:1.8;
+}
+footer a{color:rgba(255,255,255,.7);text-decoration:none}
+footer strong{color:#fff}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .5s ease both}
+.fade-up-1{animation-delay:.08s}
+.fade-up-2{animation-delay:.16s}
+.fade-up-3{animation-delay:.24s}
+
+@media(max-width:640px){
+  .hero{padding:48px 24px 40px}
+  .fit-grid,.mech-grid{grid-template-columns:1fr}
+  .hero-findings{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">
+      <svg width="10" height="10" viewBox="0 0 10 10"><circle cx="5" cy="5" r="4" fill="#7EC8E3"/></svg>
+      Interactive Data Supplement · Lancet Regional Health – Western Pacific
+    </div>
+    <h1>Depression Precedes Social Disconnection<br><em>More Strongly Than the Reverse</em></h1>
+    <div class="hero-meta">
+      <span>Simin Liu · Sydney X. Hu · Yue Hu · Jin You</span>
+      <span>CHARLS 2015–2020</span>
+      <span>n = 4,813</span>
+      <span>Cross-Lagged Panel Model · WLSMV</span>
+    </div>
+    <div class="hero-findings">
+      <div class="hf fade-up fade-up-1">
+        <div class="hf-num">2–3×</div>
+        <div class="hf-label">Depression → Loneliness stronger than the reverse across both periods</div>
+      </div>
+      <div class="hf fade-up fade-up-2">
+        <div class="hf-num">β=0.237</div>
+        <div class="hf-label">Dominant D→L path (pre-pandemic) vs β=0.080 reverse</div>
+      </div>
+      <div class="hf fade-up fade-up-3">
+        <div class="hf-num">★ 2</div>
+        <div class="hf-label">Pandemic-emergent paths: D→SI and SI→SRH newly significant</div>
+      </div>
+      <div class="hf fade-up" style="animation-delay:.32s">
+        <div class="hf-num">↔</div>
+        <div class="hf-label">Functional limitation role reverses: vulnerability → resilience buffer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="scrollTo('sec-clpm')">Path Diagram</button>
+    <button class="nav-btn" onclick="scrollTo('sec-findings')">Key Findings</button>
+    <button class="nav-btn" onclick="scrollTo('sec-sensitivity')">Sensitivity Analysis</button>
+    <button class="nav-btn" onclick="scrollTo('sec-fit')">Model Fit</button>
+    <button class="nav-btn" onclick="scrollTo('sec-mechanism')">Mechanism</button>
+    <button class="nav-btn" onclick="scrollTo('sec-methods')">Methods</button>
+  </div>
+</nav>
+
+<!-- ── SECTION 1: CLPM DIAGRAM ── -->
+<section id="sec-clpm">
+  <h2 class="sec-head">Cross-Lagged Path Diagram</h2>
+  <p class="sec-sub">Toggle between periods and subgroups to explore directional associations.</p>
+
+  <div class="ctrl-row">
+    <span class="ctrl-label">Period</span>
+    <div class="toggle-group">
+      <button class="tg-btn active" onclick="setPeriod('pre',this)">Pre-pandemic (2015–18)</button>
+      <button class="tg-btn" onclick="setPeriod('pan',this)">Pandemic transition (2018–20)</button>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Subgroup</span>
+    <div class="toggle-group">
+      <button class="tg-btn active" onclick="setGroup('all',this)">Full sample</button>
+      <button class="tg-btn" onclick="setGroup('lim',this)">With functional limitation</button>
+      <button class="tg-btn" onclick="setGroup('nolim',this)">Without functional limitation</button>
+    </div>
+  </div>
+
+  <div class="diagram-wrap">
+    <svg id="clpm-svg" viewBox="0 0 680 340"></svg>
+  </div>
+  <div class="footnote">
+    Bold red arrows indicate the dominant D→L pathway. Blue dashed = reverse L→D. Orange = SRH→L. Green ★ = pandemic-emergent paths.
+    Autoregressive paths not shown for clarity. β = fully standardised (StdYX). * p&lt;.05 ** p&lt;.01 *** p&lt;.001 ns = non-significant.
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── SECTION 2: KEY FINDINGS ── -->
+<section id="sec-findings">
+  <h2 class="sec-head">Key Findings</h2>
+  <p class="sec-sub">All reported cross-lagged β coefficients (StdYX) with significance levels.</p>
+
+  <table class="kf-table">
+    <thead>
+      <tr>
+        <th>Pathway</th>
+        <th>Period</th>
+        <th>β (StdYX)</th>
+        <th>Interpretation</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="path-dom">D → Loneliness</td>
+        <td>Pre-pandemic</td>
+        <td><span class="beta-pill bp-red">0.237***</span></td>
+        <td>Dominant path — 3× stronger than reverse</td>
+      </tr>
+      <tr class="stripe">
+        <td class="path-rev">Loneliness → D</td>
+        <td>Pre-pandemic</td>
+        <td><span class="beta-pill bp-blue">0.080***</span></td>
+        <td>Reverse path — significantly weaker</td>
+      </tr>
+      <tr>
+        <td>SRH → Loneliness</td>
+        <td>Pre-pandemic</td>
+        <td><span class="beta-pill bp-grey">−0.047*</span></td>
+        <td>Better health predicts less loneliness</td>
+      </tr>
+      <tr class="stripe">
+        <td>Loneliness → SRH</td>
+        <td>Pre-pandemic</td>
+        <td><span class="beta-pill bp-grey">−0.032 ns</span></td>
+        <td>Non-significant</td>
+      </tr>
+      <tr>
+        <td class="path-dom">D → Loneliness</td>
+        <td>Pandemic transition</td>
+        <td><span class="beta-pill bp-red">0.179***</span></td>
+        <td>Dominant path maintained</td>
+      </tr>
+      <tr class="stripe">
+        <td class="path-rev">Loneliness → D</td>
+        <td>Pandemic transition</td>
+        <td><span class="beta-pill bp-blue">0.078***</span></td>
+        <td>Reverse path — comparable to pre-pandemic</td>
+      </tr>
+      <tr>
+        <td>SRH → Loneliness</td>
+        <td>Pandemic transition</td>
+        <td><span class="beta-pill bp-grey">−0.077***</span></td>
+        <td>Strengthened during pandemic</td>
+      </tr>
+      <tr class="stripe">
+        <td class="path-emg">D → Social Isolation ★</td>
+        <td>Pandemic transition</td>
+        <td><span class="beta-pill bp-green">−0.060**</span></td>
+        <td>New path: depression reduces isolation (family mobilisation)</td>
+      </tr>
+      <tr>
+        <td class="path-emg">Social Isolation → SRH ★</td>
+        <td>Pandemic transition</td>
+        <td><span class="beta-pill bp-green">0.040**</span></td>
+        <td>New path: isolation protects health (reduced infection exposure)</td>
+      </tr>
+    </tbody>
+  </table>
+  <div class="footnote">★ = pandemic-emergent path (significant in 2018–2020 only, absent in 2015–2018). D = Depressive Symptoms; SRH = Self-rated Health.</div>
+</section>
+<div class="divider"></div>
+
+<!-- ── SECTION 3: SENSITIVITY ── -->
+<section id="sec-sensitivity">
+  <h2 class="sec-head">Sensitivity Analysis</h2>
+  <p class="sec-sub">Primary sample (n=4,813, CEM-matched + weighted) vs full longitudinal cohort (n=21,712, pairwise-present). The directional asymmetry D→L &gt; L→D is replicated in both samples.</p>
+
+  <div class="forest-wrap">
+    <svg id="fp-svg" viewBox="0 0 700 520"></svg>
+  </div>
+  <div class="footnote">
+    Solid circles = primary analysis (n=4,813). Open circles = sensitivity analysis (n=21,712). Horizontal bars = 95% CI.
+    Red = D→Loneliness (dominant). Blue = Loneliness→D (reverse). Green = pandemic-emergent.
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── SECTION 4: MODEL FIT ── -->
+<section id="sec-fit">
+  <h2 class="sec-head">Model Fit Indices</h2>
+  <p class="sec-sub">Both models estimated with WLSMV, Theta parameterisation. Sensitivity analysis (full cohort) shows improved fit.</p>
+
+  <div class="fit-grid">
+    <div class="fit-card">
+      <div class="fit-card-title">
+        <span class="fit-dot" style="background:var(--navy)"></span>
+        Primary Analysis &nbsp;·&nbsp; n = 4,813
+      </div>
+      <div class="fit-row"><span>χ²(df)</span><span class="fit-val">695.56 (41)</span></div>
+      <div class="fit-row"><span>RMSEA [90% CI]</span><span class="fit-val ok">0.058 [0.054, 0.061]</span></div>
+      <div class="fit-row"><span>CFI</span><span class="fit-val ok">0.938</span></div>
+      <div class="fit-row"><span>TLI</span><span class="fit-val ok">0.840</span></div>
+      <div class="fit-row"><span>SRMR</span><span class="fit-val good">0.038</span></div>
+    </div>
+    <div class="fit-card">
+      <div class="fit-card-title">
+        <span class="fit-dot" style="background:var(--green2);border:2px solid var(--green2)"></span>
+        Sensitivity Analysis &nbsp;·&nbsp; n = 21,712
+      </div>
+      <div class="fit-row"><span>χ²(df)</span><span class="fit-val">1278.37 (41)</span></div>
+      <div class="fit-row"><span>RMSEA [90% CI]</span><span class="fit-val good">0.037 [0.036, 0.039]</span></div>
+      <div class="fit-row"><span>CFI</span><span class="fit-val good">0.957</span></div>
+      <div class="fit-row"><span>TLI</span><span class="fit-val ok">0.890</span></div>
+      <div class="fit-row"><span>SRMR</span><span class="fit-val good">0.034</span></div>
+    </div>
+  </div>
+  <div class="footnote">Green = good fit (RMSEA &lt;0.05, CFI &gt;0.95). Amber = acceptable. Both models use WLSMV with Theta parameterisation. Higher χ² in sensitivity reflects larger n, not poorer fit.</div>
+</section>
+<div class="divider"></div>
+
+<!-- ── SECTION 5: MECHANISM ── -->
+<section id="sec-mechanism">
+  <h2 class="sec-head">Proposed Mechanism</h2>
+  <p class="sec-sub">How socio-ecological context reshapes psychosocial dynamics in Chinese older adults.</p>
+
+  <div class="mech-grid">
+    <div class="mech-panel">
+      <div class="mech-header" style="background:var(--blue)">Period A — Pre-pandemic (2015–2018)</div>
+      <div class="mech-body">
+        <svg viewBox="0 0 320 220">
+          <defs>
+            <marker id="arr-r" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#C13535" stroke-width="1.2"/>
+            </marker>
+            <marker id="arr-b" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#1A5FA0" stroke-width="1"/>
+            </marker>
+            <marker id="arr-o" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#C4641C" stroke-width="1"/>
+            </marker>
+          </defs>
+          <!-- nodes -->
+          <rect x="16" y="60" width="90" height="34" rx="5" fill="#2D7868"/>
+          <text x="61" y="82" text-anchor="middle" font-size="12" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Loneliness</text>
+          <rect x="16" y="140" width="90" height="34" rx="5" fill="#2D7868"/>
+          <text x="61" y="162" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Social Isolation</text>
+          <rect x="214" y="60" width="90" height="34" rx="5" fill="#1F3864"/>
+          <text x="259" y="75" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Dep.</text>
+          <text x="259" y="88" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Symptoms</text>
+          <rect x="214" y="140" width="90" height="34" rx="5" fill="#7A4E72"/>
+          <text x="259" y="155" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Self-rated</text>
+          <text x="259" y="168" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Health</text>
+          <!-- D→L dominant -->
+          <line x1="214" y1="70" x2="110" y2="70" stroke="#C13535" stroke-width="2.8" marker-end="url(#arr-r)"/>
+          <rect x="140" y="58" width="42" height="14" rx="3" fill="#FFF0F0"/>
+          <text x="161" y="68" text-anchor="middle" font-size="9" font-weight="500" fill="#C13535" font-family="DM Mono,monospace">0.237***</text>
+          <!-- L→D reverse -->
+          <line x1="107" y1="84" x2="212" y2="84" stroke="#1A5FA0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arr-b)"/>
+          <rect x="140" y="84" width="42" height="14" rx="3" fill="#EEF3FF"/>
+          <text x="161" y="94" text-anchor="middle" font-size="9" fill="#1A5FA0" font-family="DM Mono,monospace">0.080***</text>
+          <!-- SRH→L -->
+          <line x1="214" y1="150" x2="110" y2="90" stroke="#C4641C" stroke-width="1.2" stroke-dasharray="3,2" marker-end="url(#arr-o)"/>
+          <!-- func lim note -->
+          <rect x="16" y="188" width="288" height="26" rx="5" fill="#EEF0FA"/>
+          <rect x="16" y="188" width="4" height="26" rx="2" fill="#3030A0"/>
+          <text x="168" y="203" text-anchor="middle" font-size="10" fill="#303080" font-family="DM Sans,sans-serif">Functional limitation amplifies D↔L cycle</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mech-panel">
+      <div class="mech-header" style="background:var(--red)">Period B — Pandemic transition (2018–2020)</div>
+      <div class="mech-body">
+        <svg viewBox="0 0 320 220">
+          <defs>
+            <marker id="arr-r2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#C13535" stroke-width="1.2"/>
+            </marker>
+            <marker id="arr-b2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#1A5FA0" stroke-width="1"/>
+            </marker>
+            <marker id="arr-g2" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+              <path d="M0,0.5 L6,3.5 L0,6.5" fill="none" stroke="#1D9E75" stroke-width="1.2"/>
+            </marker>
+          </defs>
+          <rect x="16" y="60" width="90" height="34" rx="5" fill="#2D7868"/>
+          <text x="61" y="82" text-anchor="middle" font-size="12" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Loneliness</text>
+          <rect x="16" y="140" width="90" height="34" rx="5" fill="#2D7868"/>
+          <text x="61" y="162" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Social Isolation</text>
+          <rect x="214" y="60" width="90" height="34" rx="5" fill="#1F3864"/>
+          <text x="259" y="75" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Dep.</text>
+          <text x="259" y="88" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Symptoms</text>
+          <rect x="214" y="140" width="90" height="34" rx="5" fill="#7A4E72"/>
+          <text x="259" y="155" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Self-rated</text>
+          <text x="259" y="168" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Health</text>
+          <!-- D→L dominant -->
+          <line x1="214" y1="70" x2="110" y2="70" stroke="#C13535" stroke-width="2.4" marker-end="url(#arr-r2)"/>
+          <rect x="140" y="58" width="42" height="14" rx="3" fill="#FFF0F0"/>
+          <text x="161" y="68" text-anchor="middle" font-size="9" font-weight="500" fill="#C13535" font-family="DM Mono,monospace">0.179***</text>
+          <!-- L→D reverse -->
+          <line x1="107" y1="84" x2="212" y2="84" stroke="#1A5FA0" stroke-width="1.3" stroke-dasharray="4,3" marker-end="url(#arr-b2)"/>
+          <rect x="140" y="84" width="42" height="14" rx="3" fill="#EEF3FF"/>
+          <text x="161" y="94" text-anchor="middle" font-size="9" fill="#1A5FA0" font-family="DM Mono,monospace">0.078***</text>
+          <!-- D→SI NEW -->
+          <line x1="214" y1="84" x2="110" y2="142" stroke="#1D9E75" stroke-width="1.8" marker-end="url(#arr-g2)"/>
+          <rect x="148" y="108" width="42" height="14" rx="3" fill="#E8F8F2"/>
+          <text x="169" y="118" text-anchor="middle" font-size="9" fill="#0F6E56" font-family="DM Mono,monospace">−0.060**</text>
+          <!-- SI→SRH NEW -->
+          <line x1="107" y1="157" x2="212" y2="157" stroke="#1D9E75" stroke-width="1.8" marker-end="url(#arr-g2)"/>
+          <rect x="134" y="145" width="54" height="14" rx="3" fill="#E8F8F2"/>
+          <text x="161" y="155" text-anchor="middle" font-size="9" fill="#0F6E56" font-family="DM Mono,monospace">★ 0.040**</text>
+          <!-- func lim note -->
+          <rect x="16" y="188" width="288" height="26" rx="5" fill="#FEF3E2"/>
+          <rect x="16" y="188" width="4" height="26" rx="2" fill="#C13535"/>
+          <text x="168" y="203" text-anchor="middle" font-size="10" fill="#8A2020" font-family="DM Sans,sans-serif">Functional limitation → resilience buffer</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ── SECTION 6: METHODS ── -->
+<section id="sec-methods">
+  <h2 class="sec-head">Methods Summary</h2>
+  <p class="sec-sub">Key design and analytic decisions.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px">
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Data</div>
+      <p style="font-size:13.5px">CHARLS (China Health and Retirement Longitudinal Study), waves 2015, 2018, 2020. Nationally representative sample, adults ≥45 years.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Sample Selection</div>
+      <p style="font-size:13.5px">Coarsened exact matching (CEM) on age, sex, education, residence. Final n=4,813 (1,966 with / 2,847 without functional limitations). Survey weights applied.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Statistical Model</div>
+      <p style="font-size:13.5px">Cross-lagged panel models (CLPM) in Mplus 8.3. Estimator: WLSMV with Theta parameterisation. Multi-group analysis by functional limitation status.</p>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px 20px">
+      <div style="font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Measures</div>
+      <p style="font-size:13.5px">Loneliness: CESD-10 single item. Social Isolation: 4-item index. Depressive symptoms: CESD-9. Self-rated health: 3-category. Functional limitation: ADL/IADL.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p><strong>Depression Precedes Social Disconnection More Strongly Than the Reverse</strong></p>
+  <p>Liu S, Hu SX, Hu Y, You J · Kiang Wu Nursing College of Macau · Wuhan University · CUHK</p>
+  <p style="margin-top:10px">Data: <a href="http://charls.pku.edu.cn" target="_blank">CHARLS (Peking University)</a> · Funded by National Social Science Foundation of China (24BSH129)</p>
+  <p style="margin-top:8px;font-size:11px">This interactive supplement is for academic communication. All β values are fully standardised (StdYX) from WLSMV estimation.</p>
+</footer>
+
+<script>
+/* ══ STATE ══ */
+let period = 'pre';
+let group  = 'all';
+
+function scrollTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+
+function setPeriod(p, btn){
+  period = p;
+  document.querySelectorAll('.toggle-group:first-of-type .tg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawCLPM();
+}
+function setGroup(g, btn){
+  group = g;
+  document.querySelectorAll('.toggle-group:last-of-type .tg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawCLPM();
+}
+
+/* ══ DATA ══ */
+const DATA = {
+  pre: {
+    all:   { DL:0.237, LD:0.080, HL:-.047, LH:-.032, DI:null, IH:null, hlNS:false, lhNS:true  },
+    lim:   { DL:0.246, LD:0.080, HL:-.048, LH:-.030, DI:null, IH:null, hlNS:false, lhNS:true  },
+    nolim: { DL:0.218, LD:0.076, HL:-.045, LH:-.031, DI:null, IH:null, hlNS:false, lhNS:true  },
+  },
+  pan: {
+    all:   { DL:0.179, LD:0.078, HL:-.077, LH: .036, DI:-.060, IH:.040, hlNS:false, lhNS:true  },
+    lim:   { DL:0.173, LD:0.101, HL:-.080, LH: .034, DI:-.058, IH:.038, hlNS:false, lhNS:true  },
+    nolim: { DL:0.156, LD:0.107, HL:-.074, LH: .035, DI:-.055, IH:.039, hlNS:false, lhNS:false },
+  },
+};
+
+/* ══ CLPM SVG ══ */
+function drawCLPM(){
+  const svg = document.getElementById('clpm-svg');
+  const d   = DATA[period][group];
+  const W=680, H=340;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+
+  /* node centres */
+  const L  = {x:120, y:100};
+  const SI = {x:120, y:240};
+  const D  = {x:560, y:100};
+  const SRH= {x:560, y:240};
+  const NW=108, NH=40;
+
+  let html='';
+
+  /* defs for arrowheads */
+  const mkArr=(id,col)=>`
+    <marker id="${id}" markerWidth="7" markerHeight="7" refX="5.5" refY="3.5" orient="auto">
+      <path d="M0,0.5 L6,3.5 L0,6.5" fill="${col}" stroke="none"/>
+    </marker>`;
+
+  html+=`<defs>
+    ${mkArr('a-r','#C13535')}
+    ${mkArr('a-b','#1A5FA0')}
+    ${mkArr('a-o','#C4641C')}
+    ${mkArr('a-g','#1D9E75')}
+    ${mkArr('a-gr','#888780')}
+  </defs>`;
+
+  /* background rect */
+  html+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#FAFAF8" rx="10"/>`;
+
+  /* period badge */
+  const pLabel = period==='pre' ? 'Pre-pandemic  ·  2015→2018' : 'Pandemic transition  ·  2018→2020';
+  const pCol   = period==='pre' ? '#1A5FA0' : '#C13535';
+  const gLabel = group==='all' ? 'Full sample (n=4,813)' : group==='lim' ? 'With functional limitation (n=1,966)' : 'Without functional limitation (n=2,847)';
+  html+=`
+    <rect x="12" y="10" width="220" height="24" rx="5" fill="${pCol}22"/>
+    <text x="122" y="26" text-anchor="middle" font-size="11" font-weight="500" fill="${pCol}" font-family="DM Sans,sans-serif">${pLabel}</text>
+    <rect x="448" y="10" width="220" height="24" rx="5" fill="#88878022"/>
+    <text x="558" y="26" text-anchor="middle" font-size="11" fill="#555" font-family="DM Sans,sans-serif">${gLabel}</text>`;
+
+  /* helper: draw labelled arrow between two node edges */
+  function drawArr(fx,fy,tx,ty,col,dash,lbl,bold,yOff){
+    const dx=tx-fx,dy=ty-fy,len=Math.sqrt(dx*dx+dy*dy);
+    const ux=dx/len,uy=dy/len;
+    const px=-uy,py=ux;
+    const off=yOff||0;
+    const x1=fx+px*off, y1=fy+py*off;
+    const x2=tx+px*off-ux*7, y2=ty+py*off-uy*7;
+    const markId = col==='#C13535'?'a-r':col==='#1A5FA0'?'a-b':col==='#C4641C'?'a-o':col==='#1D9E75'?'a-g':'a-gr';
+    const sw = bold?2.8:1.4;
+    html+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"
+      stroke="${col}" stroke-width="${sw}"
+      stroke-dasharray="${dash||''}"
+      marker-end="url(#${markId})" opacity="${bold?1:0.9}"/>`;
+    if(lbl){
+      const mx=(x1+x2)/2+px*18, my=(y1+y2)/2+py*18;
+      const tw=lbl.length*6.2;
+      html+=`<rect x="${mx-tw/2-4}" y="${my-7}" width="${tw+8}" height="15" rx="3" fill="#F7F5F0"/>`;
+      html+=`<text x="${mx}" y="${my+4}" text-anchor="middle" font-size="10"
+        font-weight="${bold?'500':'400'}" fill="${col}"
+        font-family="DM Mono,monospace">${lbl}</text>`;
+    }
+  }
+
+  /* edges from nodes: L(right), D(left), SI(right), SRH(left) */
+  const Le ={x:L.x+NW/2,  y:L.y};
+  const Lw ={x:L.x-NW/2,  y:L.y};
+  const Lb ={x:L.x,       y:L.y+NH/2};
+  const De ={x:D.x+NW/2,  y:D.y};
+  const Dw ={x:D.x-NW/2,  y:D.y};
+  const Db ={x:D.x,       y:D.y+NH/2};
+  const SIr={x:SI.x+NW/2, y:SI.y};
+  const SIt={x:SI.x,      y:SI.y-NH/2};
+  const SRt={x:SRH.x,     y:SRH.y-NH/2};
+  const SRw={x:SRH.x-NW/2,y:SRH.y};
+
+  /* D→L dominant */
+  const betaDL = d.DL.toFixed(3)+'***';
+  drawArr(Dw.x, Dw.y-8, Le.x, Le.y-8, '#C13535', '', betaDL, true, 0);
+
+  /* L→D reverse */
+  const betaLD = d.LD.toFixed(3)+'***';
+  drawArr(Le.x, Le.y+8, Dw.x, Dw.y+8, '#1A5FA0', '5,3', betaLD, false, 0);
+
+  /* SRH→L */
+  const betaHL = (d.HL>0?'+':'')+d.HL.toFixed(3)+(d.hlNS?'':d.HL<-0.05?'***':'*');
+  drawArr(SRw.x, SRw.y, Le.x+20, Lb.y, '#C4641C', '3,2',
+    betaHL+(d.hlNS?' ns':''), false, 0);
+
+  /* L→SRH */
+  const betaLH = (d.LH>0?'+':'')+d.LH.toFixed(3);
+  drawArr(Lb.x-10, Lb.y, SRw.x+10, SRt.y, '#888780', '5,4',
+    betaLH+(d.lhNS?' ns':'*'), false, 0);
+
+  /* pandemic-emergent paths */
+  if(d.DI !== null){
+    drawArr(Db.x, Db.y, SIr.x, SIt.y, '#1D9E75', '',
+      '★ '+d.DI.toFixed(3)+'**', false, 0);
+    drawArr(SIr.x, SIr.y-6, SRw.x, SRH.y-6, '#1D9E75', '',
+      '★ +'+d.IH.toFixed(3)+'**', false, 0);
+  }
+
+  /* nodes */
+  function drawNode(cx,cy,col,label,sub){
+    html+=`<rect x="${cx-NW/2+2}" y="${cy-NH/2+2}" width="${NW}" height="${NH}" rx="6" fill="#00000015"/>`;
+    html+=`<rect x="${cx-NW/2}" y="${cy-NH/2}" width="${NW}" height="${NH}" rx="6" fill="${col}"/>`;
+    if(sub){
+      html+=`<text x="${cx}" y="${cy-5}" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">${label}</text>`;
+      html+=`<text x="${cx}" y="${cy+9}" text-anchor="middle" font-size="9.5" fill="rgba(255,255,255,.75)" font-family="DM Sans,sans-serif">${sub}</text>`;
+    } else {
+      html+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" font-size="12" font-weight="500" fill="white" font-family="DM Sans,sans-serif">${label}</text>`;
+    }
+  }
+
+  drawNode(L.x,  L.y,  '#2D7868','L','Loneliness');
+  drawNode(SI.x, SI.y, '#2D7868','SI','Social Isolation');
+  drawNode(D.x,  D.y,  '#1F3864','D','Dep. Symptoms');
+  drawNode(SRH.x,SRH.y,'#7A4E72','H','Self-rated Health');
+
+  /* asymmetry annotation */
+  const ratio = (d.DL/d.LD).toFixed(1);
+  html+=`
+    <rect x="${W/2-62}" y="${L.y-22}" width="124" height="20" rx="10" fill="#FFF0F0"/>
+    <text x="${W/2}" y="${L.y-7}" text-anchor="middle" font-size="10" font-weight="500"
+      fill="#C13535" font-family="DM Sans,sans-serif">D→L is ${ratio}× stronger than L→D</text>`;
+
+  svg.innerHTML = html;
+}
+
+/* ══ FOREST PLOT ══ */
+function drawForest(){
+  const svg = document.getElementById('fp-svg');
+  const W=700, LW=200, RW=100, plotW=W-LW-RW;
+  const xMin=-0.24, xMax=0.44;
+  const rowH=34, secH=26, padTop=10;
+  function xPx(v){return LW+(v-xMin)/(xMax-xMin)*plotW;}
+
+  const rows=[
+    {type:'sec', label:'Pre-pandemic Period (Wave 1→2, 2015–2018)'},
+    {label:'D → Loneliness', p1:0.237,se1:0.021, p2:0.239,se2:0.014, col:'#C13535', dom:true},
+    {label:'L → Depression', p1:0.080,se1:0.015, p2:0.044,se2:0.010, col:'#1A5FA0'},
+    {label:'SRH → Loneliness',p1:-.047,se1:0.019,p2:-.068,se2:0.013,col:'#C4641C'},
+    {label:'L → SRH',        p1:-.032,se1:0.016,p2:-.003,se2:0.011,col:'#888780',ns1:true,ns2:true},
+    {type:'sec', label:'Pandemic Transition Period (Wave 2→3, 2018–2020)'},
+    {label:'D → Loneliness', p1:0.179,se1:0.024, p2:0.141,se2:0.017, col:'#C13535', dom:true},
+    {label:'L → Depression', p1:0.078,se1:0.020, p2:0.164,se2:0.015, col:'#1A5FA0'},
+    {label:'SRH → Loneliness',p1:-.077,se1:0.020,p2:-.087,se2:0.015,col:'#C4641C'},
+    {label:'L → SRH',        p1:.036, se1:0.021, p2:-.041,se2:0.016,col:'#888780',ns1:true},
+    {label:'★ D → Soc. Isolation',p1:-.060,se1:0.018,p2:-.082,se2:0.013,col:'#1D9E75',emerg:true},
+    {label:'★ Soc. Isolation → SRH',p1:.040,se1:0.015,p2:.021,se2:0.011,col:'#1D9E75',emerg:true,ns2:true},
+  ];
+
+  let html=''; let y=padTop;
+
+  rows.forEach((r,i)=>{
+    if(r.type==='sec'){
+      html+=`<rect x="0" y="${y+1}" width="${W}" height="${secH-2}" fill="#F0EDE6" rx="3"/>`;
+      html+=`<text x="${LW-8}" y="${y+secH*.72}" text-anchor="end" font-size="11" font-weight="500" fill="#2A2A28" font-family="DM Sans,sans-serif">${r.label}</text>`;
+      y+=secH; return;
+    }
+    const cy=y+rowH/2;
+    if(i%2===0) html+=`<rect x="${LW}" y="${y}" width="${plotW+RW}" height="${rowH}" fill="#F8F6F2"/>`;
+    const lc=r.emerg?'#0F6E56':'#2A2A28';
+    html+=`<text x="${LW-8}" y="${cy+4}" text-anchor="end" font-size="12" fill="${lc}" font-family="DM Sans,sans-serif">${r.label}</text>`;
+    const yp=cy-5, ys=cy+5;
+
+    function dot(p,se,yy,filled,nsF){
+      const ci=1.96*se, lo=xPx(p-ci), hi=xPx(p+ci), cx2=xPx(p);
+      const op=nsF?'opacity="0.4"':'';
+      const dash=filled?'':'stroke-dasharray="4,3"';
+      html+=`<line x1="${lo}" y1="${yy}" x2="${hi}" y2="${yy}" stroke="${r.col}" stroke-width="${filled?2:1.2}" ${dash} ${op}/>`;
+      html+=`<line x1="${lo}" y1="${yy-3}" x2="${lo}" y2="${yy+3}" stroke="${r.col}" stroke-width="1" ${op}/>`;
+      html+=`<line x1="${hi}" y1="${yy-3}" x2="${hi}" y2="${yy+3}" stroke="${r.col}" stroke-width="1" ${op}/>`;
+      if(filled){
+        html+=`<circle cx="${cx2}" cy="${yy}" r="5.5" fill="${r.col}" ${op}/>`;
+      } else {
+        html+=`<circle cx="${cx2}" cy="${yy}" r="5.5" fill="white" stroke="${r.col}" stroke-width="1.8" ${op}/>`;
+      }
+    }
+    dot(r.p1,r.se1,yp,true, r.ns1||false);
+    dot(r.p2,r.se2,ys,false,r.ns2||false);
+
+    const b1str=(r.p1>=0?' ':'')+r.p1.toFixed(3);
+    const b2str=(r.p2>=0?' ':'')+r.p2.toFixed(3);
+    const c1=r.ns1?'#AAAAAA':'#2A2A28';
+    const c2=r.ns2?'#AAAAAA':'#666';
+    html+=`<text x="${W-RW+6}" y="${yp+4}" font-size="10.5" fill="${c1}" font-family="DM Mono,monospace">${b1str}</text>`;
+    html+=`<text x="${W-RW+6}" y="${ys+4}" font-size="10.5" fill="${c2}" font-style="italic" font-family="DM Mono,monospace">${b2str}</text>`;
+    y+=rowH;
+  });
+
+  const totalH=y+44; svg.setAttribute('viewBox',`0 0 ${W} ${totalH}`);
+
+  const axY=y+8;
+  [-0.2,-0.1,0,0.1,0.2,0.3,0.4].forEach(t=>{
+    const tx=xPx(t);
+    html+=`<line x1="${tx}" y1="${padTop}" x2="${tx}" y2="${axY}"
+      stroke="${t===0?'#2A2A28':'#D5D2CB'}" stroke-width="${t===0?1.2:.5}"
+      stroke-dasharray="${t===0?'':'3,3'}"/>`;
+    html+=`<text x="${tx}" y="${axY+13}" text-anchor="middle" font-size="11" fill="#888" font-family="DM Mono,monospace">${t.toFixed(1)}</text>`;
+  });
+  html+=`<text x="${LW+plotW/2}" y="${axY+28}" text-anchor="middle" font-size="11" fill="#888" font-family="DM Sans,sans-serif">Standardised coefficient β (StdYX)</text>`;
+  html+=`<line x1="${LW}" y1="${padTop}" x2="${LW}" y2="${axY}" stroke="#D5D2CB" stroke-width=".5"/>`;
+  html+=`<text x="${W-RW+6}" y="${axY+13}" font-size="10" fill="#AAA" font-family="DM Sans,sans-serif">β primary</text>`;
+  html+=`<text x="${W-RW+6}" y="${axY+25}" font-size="10" fill="#AAA" font-style="italic" font-family="DM Sans,sans-serif">β sensitivity</text>`;
+
+  svg.innerHTML=html;
+}
+
+/* ══ INIT ══ */
+drawCLPM();
+drawForest();
+
+/* ── scroll-spy nav ── */
+const sections = ['sec-clpm','sec-findings','sec-sensitivity','sec-fit','sec-mechanism','sec-methods'];
+const navBtns  = document.querySelectorAll('.nav-btn');
+window.addEventListener('scroll',()=>{
+  let active=0;
+  sections.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el && el.getBoundingClientRect().top < 120) active=i;
+  });
+  navBtns.forEach((b,i)=>b.classList.toggle('active',i===active));
+},{passive:true});
+</script>
+</body>
+</html>
