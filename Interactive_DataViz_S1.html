@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interactive Data Visualisation — Depression Precedes Social Disconnection · CHARLS 2015–2020</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1F3864; --teal:#2D7868; --plum:#7A4E72;
+  --red:#C13535; --blue:#1A5FA0; --green:#0F6E56;
+  --green2:#1D9E75; --orange:#C4641C; --grey:#888780;
+  --ink:#1A1816; --muted:#6B6860;
+  --border:#E0DDD6; --bg:#F8F6F1; --card:#FFFFFF;
+  --stripe:#F3F1EC;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.65}
+
+/* HERO */
+.hero{background:var(--navy);padding:68px 48px 52px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 60% 80% at 80% 50%,#2C5F8A44,transparent),
+             radial-gradient(ellipse 40% 60% at 10% 80%,#1D9E7522,transparent);pointer-events:none}
+.hero-inner{max-width:880px;margin:0 auto;position:relative}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);
+  border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:5px 14px;
+  font-size:11px;font-weight:500;letter-spacing:.8px;text-transform:uppercase;
+  color:rgba(255,255,255,.75);margin-bottom:22px}
+.hero h1{font-family:'DM Serif Display',serif;font-size:clamp(1.6rem,3vw,2.4rem);
+  color:#fff;line-height:1.2;margin-bottom:14px;font-weight:400}
+.hero h1 em{color:#7EC8E3;font-style:italic}
+.hero-meta{font-size:13px;color:rgba(255,255,255,.55);margin-bottom:28px;
+  display:flex;flex-wrap:wrap;gap:6px 20px}
+.hero-findings{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:28px}
+.hf{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:14px 16px}
+.hf-num{font-family:'DM Mono',monospace;font-size:1.7rem;font-weight:500;color:#7EC8E3;line-height:1;margin-bottom:5px}
+.hf-label{font-size:11px;color:rgba(255,255,255,.6);line-height:1.4}
+
+/* NAV */
+nav{background:var(--card);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.nav-inner{max-width:940px;margin:0 auto;display:flex;gap:0;overflow-x:auto}
+.nav-btn{padding:13px 18px;font-size:13px;font-weight:500;border:none;background:none;
+  color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;transition:all .15s}
+.nav-btn.active,.nav-btn:hover{color:var(--navy);border-bottom-color:var(--navy)}
+
+/* SECTIONS */
+section{max-width:940px;margin:0 auto;padding:48px 24px}
+.sec-head{font-family:'DM Serif Display',serif;font-size:1.55rem;font-weight:400;color:var(--navy);margin-bottom:6px}
+.sec-sub{font-size:13.5px;color:var(--muted);margin-bottom:28px;max-width:640px}
+.divider{height:1px;background:var(--border);margin:0 24px}
+
+/* CONTROLS */
+.ctrl-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:24px;align-items:center}
+.ctrl-label{font-size:11.5px;font-weight:500;color:var(--muted);letter-spacing:.4px;text-transform:uppercase;margin-right:4px}
+.toggle-group{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.tg-btn{padding:8px 16px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  border:none;background:none;cursor:pointer;color:var(--muted);transition:all .15s;white-space:nowrap}
+.tg-btn.active{background:var(--navy);color:#fff}
+
+/* DIAGRAM */
+.diagram-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 20px 18px}
+#clpm-svg{width:100%;height:auto;display:block;cursor:default}
+
+/* TOOLTIP */
+.tooltip{
+  position:fixed;
+  background:var(--ink);
+  color:#fff;
+  border-radius:8px;
+  padding:10px 14px;
+  font-size:12.5px;
+  line-height:1.6;
+  pointer-events:none;
+  z-index:1000;
+  max-width:240px;
+  box-shadow:0 4px 20px rgba(0,0,0,.25);
+  opacity:0;
+  transition:opacity .12s;
+}
+.tooltip.visible{opacity:1}
+.tooltip-title{font-weight:500;margin-bottom:4px;font-size:13px}
+.tooltip-row{display:flex;justify-content:space-between;gap:16px;font-size:12px}
+.tooltip-row span:last-child{font-family:'DM Mono',monospace;font-weight:500}
+
+/* FOREST PLOT */
+.forest-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px 20px}
+.fp-controls{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.fp-filter{padding:6px 14px;border:1px solid var(--border);border-radius:20px;
+  font-size:12.5px;cursor:pointer;background:none;color:var(--muted);transition:all .15s;font-family:'DM Sans',sans-serif}
+.fp-filter.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+#fp-svg{width:100%;height:auto;display:block;cursor:default}
+.fp-legend{display:flex;flex-wrap:wrap;gap:16px;margin-top:14px}
+.fp-leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+
+/* FIT CARDS */
+.fit-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px}
+.fit-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px 20px}
+.fit-card-title{font-size:11px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.fit-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.fit-row-item{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--stripe);font-size:13px}
+.fit-row-item:last-child{border:none}
+.fv{font-family:'DM Mono',monospace;font-weight:500;font-size:12px}
+.good{color:var(--green)}.ok{color:#8A6200}
+
+/* FINDINGS TABLE */
+.kf-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.kf-table th{text-align:left;padding:10px 14px;font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid var(--navy)}
+.kf-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:middle}
+.kf-table tr:last-child td{border:none}
+.kf-table tr.stripe td{background:var(--stripe)}
+.bp{display:inline-block;padding:2px 9px;border-radius:12px;font-family:'DM Mono',monospace;font-size:11.5px;font-weight:500}
+.bp-red{background:#FEF0F0;color:var(--red)}
+.bp-blue{background:#EEF4FF;color:var(--blue)}
+.bp-green{background:#E8F8F2;color:var(--green)}
+.bp-grey{background:var(--stripe);color:var(--grey)}
+
+/* MECHANISM */
+.mech-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.mech-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.mech-header{padding:12px 18px;font-size:12px;font-weight:500;color:#fff}
+.mech-body{padding:16px}
+
+/* METHODS */
+.methods-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:13px}
+.method-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.method-label{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+
+/* FOOTNOTE */
+.footnote{font-size:12px;color:var(--muted);line-height:1.6;margin-top:16px;padding-top:12px;border-top:1px solid var(--border)}
+
+/* FOOTER */
+footer{background:var(--navy);padding:36px 24px;text-align:center;color:rgba(255,255,255,.45);font-size:12px;line-height:1.8}
+footer strong{color:rgba(255,255,255,.75)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.fade-up{animation:fadeUp .45s ease both}
+.fade-up-1{animation-delay:.07s}.fade-up-2{animation-delay:.14s}.fade-up-3{animation-delay:.21s}.fade-up-4{animation-delay:.28s}
+
+@media(max-width:620px){
+  .hero{padding:44px 20px 36px}
+  .fit-grid,.mech-grid{grid-template-columns:1fr}
+  .hero-findings{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLTIP (shared) -->
+<div class="tooltip" id="tooltip"></div>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-tag">
+      <svg width="8" height="8"><circle cx="4" cy="4" r="3.5" fill="#7EC8E3"/></svg>
+      Interactive Data Visualisation · Lancet Regional Health – Western Pacific
+    </div>
+    <h1>Depression Precedes Social Disconnection<br><em>More Strongly Than the Reverse</em></h1>
+    <div class="hero-meta">
+      <span>Liu S · Hu SX · Hu Y · You J</span>
+      <span>CHARLS 2015–2020</span>
+      <span>n = 4,813</span>
+      <span>CLPM · WLSMV · Theta parameterisation</span>
+    </div>
+    <div class="hero-findings">
+      <div class="hf fade-up fade-up-1"><div class="hf-num">2–3×</div><div class="hf-label">D→Loneliness stronger than reverse across both periods</div></div>
+      <div class="hf fade-up fade-up-2"><div class="hf-num">β=0.237</div><div class="hf-label">Dominant path pre-pandemic vs β=0.080 reverse</div></div>
+      <div class="hf fade-up fade-up-3"><div class="hf-num">★ 2</div><div class="hf-label">Pandemic-emergent paths newly significant</div></div>
+      <div class="hf fade-up fade-up-4"><div class="hf-num">↔</div><div class="hf-label">Functional limitation reverses: vulnerability → resilience</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <button class="nav-btn active" onclick="navTo('sec-clpm')">Path Diagram</button>
+    <button class="nav-btn" onclick="navTo('sec-findings')">Key Findings</button>
+    <button class="nav-btn" onclick="navTo('sec-forest')">Sensitivity Forest Plot</button>
+    <button class="nav-btn" onclick="navTo('sec-fit')">Model Fit</button>
+    <button class="nav-btn" onclick="navTo('sec-mech')">Mechanism</button>
+    <button class="nav-btn" onclick="navTo('sec-methods')">Methods</button>
+  </div>
+</nav>
+
+<!-- ══ SECTION 1: CLPM ══ -->
+<section id="sec-clpm">
+  <h2 class="sec-head">Cross-Lagged Path Diagram</h2>
+  <p class="sec-sub">Toggle period and subgroup. Hover over any arrow to see the full β coefficient, SE, 95% CI, and p-value.</p>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Period</span>
+    <div class="toggle-group" id="tg-period">
+      <button class="tg-btn active" onclick="setPeriod('pre',this)">Pre-pandemic (2015–18)</button>
+      <button class="tg-btn" onclick="setPeriod('pan',this)">Pandemic transition (2018–20)</button>
+    </div>
+  </div>
+  <div class="ctrl-row">
+    <span class="ctrl-label">Subgroup</span>
+    <div class="toggle-group" id="tg-group">
+      <button class="tg-btn active" onclick="setGroup('all',this)">Full sample</button>
+      <button class="tg-btn" onclick="setGroup('lim',this)">With functional limitation</button>
+      <button class="tg-btn" onclick="setGroup('nolim',this)">Without functional limitation</button>
+    </div>
+  </div>
+  <div class="diagram-wrap">
+    <svg id="clpm-svg" viewBox="0 0 720 360"></svg>
+  </div>
+  <div class="footnote">
+    Hover any arrow for detailed statistics. Bold red = dominant D→L pathway. Blue dashed = reverse L→D. Orange = SRH→L. Green ★ = pandemic-emergent paths only. Autoregressive paths omitted for clarity. β = StdYX. &nbsp;* p&lt;.05 &nbsp;** p&lt;.01 &nbsp;*** p&lt;.001
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ SECTION 2: FINDINGS TABLE ══ -->
+<section id="sec-findings">
+  <h2 class="sec-head">Key Findings</h2>
+  <p class="sec-sub">All reported cross-lagged β coefficients (StdYX) with significance levels.</p>
+  <table class="kf-table">
+    <thead><tr><th>Pathway</th><th>Period</th><th>β (StdYX)</th><th>SE</th><th>95% CI</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td style="color:var(--red);font-weight:500">D → Loneliness</td><td>Pre-pandemic</td><td><span class="bp bp-red">0.237***</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.021</td><td style="font-family:'DM Mono',monospace;font-size:12px">[0.196, 0.278]</td><td>Dominant — 2.96× stronger than reverse</td></tr>
+      <tr class="stripe"><td style="color:var(--blue)">Loneliness → D</td><td>Pre-pandemic</td><td><span class="bp bp-blue">0.080***</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.015</td><td style="font-family:'DM Mono',monospace;font-size:12px">[0.051, 0.109]</td><td>Reverse — substantially weaker</td></tr>
+      <tr><td style="color:var(--orange)">SRH → Loneliness</td><td>Pre-pandemic</td><td><span class="bp bp-grey">−0.047*</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.019</td><td style="font-family:'DM Mono',monospace;font-size:12px">[−0.084, −0.010]</td><td>Better health predicts less loneliness</td></tr>
+      <tr class="stripe"><td style="color:var(--grey)">Loneliness → SRH</td><td>Pre-pandemic</td><td><span class="bp bp-grey">−0.032 ns</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.016</td><td style="font-family:'DM Mono',monospace;font-size:12px">[−0.064, 0.000]</td><td>Non-significant</td></tr>
+      <tr><td style="color:var(--red);font-weight:500">D → Loneliness</td><td>Pandemic transition</td><td><span class="bp bp-red">0.179***</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.024</td><td style="font-family:'DM Mono',monospace;font-size:12px">[0.132, 0.226]</td><td>Dominant — 2.30× stronger than reverse</td></tr>
+      <tr class="stripe"><td style="color:var(--blue)">Loneliness → D</td><td>Pandemic transition</td><td><span class="bp bp-blue">0.078***</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.020</td><td style="font-family:'DM Mono',monospace;font-size:12px">[0.039, 0.117]</td><td>Reverse — comparable magnitude</td></tr>
+      <tr><td style="color:var(--orange)">SRH → Loneliness</td><td>Pandemic transition</td><td><span class="bp bp-grey">−0.077***</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.020</td><td style="font-family:'DM Mono',monospace;font-size:12px">[−0.116, −0.038]</td><td>Strengthened during pandemic</td></tr>
+      <tr class="stripe"><td style="color:var(--green);font-weight:500">★ D → Social Isolation</td><td>Pandemic transition</td><td><span class="bp bp-green">−0.060**</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.018</td><td style="font-family:'DM Mono',monospace;font-size:12px">[−0.095, −0.025]</td><td>New: depression reduces isolation</td></tr>
+      <tr><td style="color:var(--green);font-weight:500">★ Social Isolation → SRH</td><td>Pandemic transition</td><td><span class="bp bp-green">0.040**</span></td><td style="font-family:'DM Mono',monospace;font-size:12px">0.015</td><td style="font-family:'DM Mono',monospace;font-size:12px">[0.011, 0.069]</td><td>New: isolation protects health</td></tr>
+    </tbody>
+  </table>
+  <div class="footnote">★ = pandemic-emergent path (significant 2018–2020 only). CI = 95% confidence interval computed as β ± 1.96 × SE. D = Depressive Symptoms; SRH = Self-rated Health; SI = Social Isolation.</div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ SECTION 3: FOREST PLOT ══ -->
+<section id="sec-forest">
+  <h2 class="sec-head">Sensitivity Analysis — Forest Plot</h2>
+  <p class="sec-sub">Primary (n=4,813, CEM-matched) vs full cohort (n=21,712, pairwise-present). Hover each point for full statistics. Filter by period or path type.</p>
+  <div class="fp-controls">
+    <span style="font-size:12px;font-weight:500;color:var(--muted);align-self:center">Filter:</span>
+    <button class="fp-filter active" onclick="setFPFilter('all',this)">All paths</button>
+    <button class="fp-filter" onclick="setFPFilter('pre',this)">Pre-pandemic only</button>
+    <button class="fp-filter" onclick="setFPFilter('pan',this)">Pandemic only</button>
+    <button class="fp-filter" onclick="setFPFilter('focal',this)">Focal (D↔L) only</button>
+  </div>
+  <div class="forest-wrap">
+    <svg id="fp-svg" viewBox="0 0 720 540"></svg>
+  </div>
+  <div class="fp-legend">
+    <div class="fp-leg"><svg width="24" height="14"><circle cx="8" cy="7" r="5" fill="#C13535"/><line x1="14" y1="7" x2="22" y2="7" stroke="#C13535" stroke-width="1.5"/></svg><span>Primary (n=4,813)</span></div>
+    <div class="fp-leg"><svg width="24" height="14"><circle cx="8" cy="7" r="5" fill="none" stroke="#C13535" stroke-width="1.5"/><line x1="14" y1="7" x2="22" y2="7" stroke="#C13535" stroke-width="1.5" stroke-dasharray="3,2"/></svg><span>Sensitivity (n=21,712)</span></div>
+    <div class="fp-leg"><span style="width:10px;height:10px;border-radius:50%;background:#C13535;display:inline-block"></span><span style="margin-left:4px">D→L dominant</span></div>
+    <div class="fp-leg"><span style="width:10px;height:10px;border-radius:50%;background:#1A5FA0;display:inline-block"></span><span style="margin-left:4px">L→D reverse</span></div>
+    <div class="fp-leg"><span style="width:10px;height:10px;border-radius:50%;background:#1D9E75;display:inline-block"></span><span style="margin-left:4px">Pandemic-emergent ★</span></div>
+  </div>
+  <div class="footnote">Hover any point to see β, SE, 95% CI, and p-value. Horizontal bars = 95% CI. Faded points = non-significant (p≥.05). Both models use WLSMV, Theta parameterisation.</div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ SECTION 4: MODEL FIT ══ -->
+<section id="sec-fit">
+  <h2 class="sec-head">Model Fit Indices</h2>
+  <p class="sec-sub">Sensitivity analysis (full cohort) shows improved fit, supporting robustness of primary findings.</p>
+  <div class="fit-grid">
+    <div class="fit-card">
+      <div class="fit-card-title"><span class="fit-dot" style="background:var(--navy)"></span>Primary Analysis · n = 4,813</div>
+      <div class="fit-row-item"><span>χ²(df)</span><span class="fv">695.56 (41)</span></div>
+      <div class="fit-row-item"><span>RMSEA [90% CI]</span><span class="fv ok">0.058 [0.054, 0.061]</span></div>
+      <div class="fit-row-item"><span>CFI</span><span class="fv ok">0.938</span></div>
+      <div class="fit-row-item"><span>TLI</span><span class="fv ok">0.840</span></div>
+      <div class="fit-row-item"><span>SRMR</span><span class="fv good">0.038</span></div>
+    </div>
+    <div class="fit-card">
+      <div class="fit-card-title"><span class="fit-dot" style="background:var(--green2)"></span>Sensitivity Analysis · n = 21,712</div>
+      <div class="fit-row-item"><span>χ²(df)</span><span class="fv">1278.37 (41)</span></div>
+      <div class="fit-row-item"><span>RMSEA [90% CI]</span><span class="fv good">0.037 [0.036, 0.039]</span></div>
+      <div class="fit-row-item"><span>CFI</span><span class="fv good">0.957</span></div>
+      <div class="fit-row-item"><span>TLI</span><span class="fv ok">0.890</span></div>
+      <div class="fit-row-item"><span>SRMR</span><span class="fv good">0.034</span></div>
+    </div>
+  </div>
+  <div class="footnote"><span style="color:var(--green);font-weight:500">Green</span> = good fit (RMSEA &lt;0.05, CFI &gt;0.95). <span style="color:#8A6200;font-weight:500">Amber</span> = acceptable. Higher χ² in sensitivity reflects larger n, not poorer fit. Both models: WLSMV, Theta parameterisation.</div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ SECTION 5: MECHANISM ══ -->
+<section id="sec-mech">
+  <h2 class="sec-head">Mechanism Overview</h2>
+  <p class="sec-sub">How socio-ecological context reshapes psychosocial dynamics in Chinese older adults.</p>
+  <div class="mech-grid">
+    <div class="mech-panel">
+      <div class="mech-header" style="background:var(--blue)">Period A — Pre-pandemic (2015–2018)</div>
+      <div class="mech-body">
+        <svg viewBox="0 0 300 210">
+          <defs>
+            <marker id="mr1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#C13535"/></marker>
+            <marker id="mb1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#1A5FA0"/></marker>
+            <marker id="mo1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#C4641C"/></marker>
+          </defs>
+          <rect x="10" y="40" width="94" height="34" rx="5" fill="#2D7868"/>
+          <text x="57" y="62" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Loneliness</text>
+          <rect x="10" y="116" width="94" height="34" rx="5" fill="#2D7868"/>
+          <text x="57" y="134" text-anchor="middle" font-size="10" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Soc. Isolation</text>
+          <rect x="196" y="40" width="94" height="34" rx="5" fill="#1F3864"/>
+          <text x="243" y="54" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Dep.</text>
+          <text x="243" y="67" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Symptoms</text>
+          <rect x="196" y="116" width="94" height="34" rx="5" fill="#7A4E72"/>
+          <text x="243" y="130" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Self-rated</text>
+          <text x="243" y="143" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Health</text>
+          <!-- D→L -->
+          <line x1="196" y1="50" x2="108" y2="50" stroke="#C13535" stroke-width="2.6" marker-end="url(#mr1)"/>
+          <rect x="122" y="40" width="48" height="14" rx="3" fill="#FEF0F0"/>
+          <text x="146" y="50" text-anchor="middle" font-size="8.5" font-weight="500" fill="#C13535" font-family="DM Mono,monospace">0.237***</text>
+          <!-- L→D -->
+          <line x1="105" y1="63" x2="194" y2="63" stroke="#1A5FA0" stroke-width="1.3" stroke-dasharray="4,2.5" marker-end="url(#mb1)"/>
+          <rect x="122" y="63" width="48" height="14" rx="3" fill="#EEF4FF"/>
+          <text x="146" y="73" text-anchor="middle" font-size="8.5" fill="#1A5FA0" font-family="DM Mono,monospace">0.080***</text>
+          <!-- SRH→L diag -->
+          <line x1="196" y1="128" x2="108" y2="72" stroke="#C4641C" stroke-width="1.1" stroke-dasharray="3,2" marker-end="url(#mo1)"/>
+          <!-- func lim -->
+          <rect x="10" y="164" width="280" height="26" rx="5" fill="#EBF1FA"/>
+          <rect x="10" y="164" width="4" height="26" rx="2" fill="#1A5FA0"/>
+          <text x="155" y="181" text-anchor="middle" font-size="9.5" fill="#1F3864" font-family="DM Sans,sans-serif">Functional limitation amplifies D↔L cycle</text>
+        </svg>
+      </div>
+    </div>
+    <div class="mech-panel">
+      <div class="mech-header" style="background:var(--red)">Period B — Pandemic transition (2018–2020)</div>
+      <div class="mech-body">
+        <svg viewBox="0 0 300 210">
+          <defs>
+            <marker id="mr2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#C13535"/></marker>
+            <marker id="mb2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#1A5FA0"/></marker>
+            <marker id="mg2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0.5 L5,3 L0,5.5" fill="#1D9E75"/></marker>
+          </defs>
+          <rect x="10" y="40" width="94" height="34" rx="5" fill="#2D7868"/>
+          <text x="57" y="62" text-anchor="middle" font-size="11" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Loneliness</text>
+          <rect x="10" y="116" width="94" height="34" rx="5" fill="#2D7868"/>
+          <text x="57" y="134" text-anchor="middle" font-size="10" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Soc. Isolation</text>
+          <rect x="196" y="40" width="94" height="34" rx="5" fill="#1F3864"/>
+          <text x="243" y="54" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Dep.</text>
+          <text x="243" y="67" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Symptoms</text>
+          <rect x="196" y="116" width="94" height="34" rx="5" fill="#7A4E72"/>
+          <text x="243" y="130" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Self-rated</text>
+          <text x="243" y="143" text-anchor="middle" font-size="10.5" font-weight="500" fill="white" font-family="DM Sans,sans-serif">Health</text>
+          <!-- D→L -->
+          <line x1="196" y1="50" x2="108" y2="50" stroke="#C13535" stroke-width="2.2" marker-end="url(#mr2)"/>
+          <rect x="122" y="40" width="48" height="14" rx="3" fill="#FEF0F0"/>
+          <text x="146" y="50" text-anchor="middle" font-size="8.5" font-weight="500" fill="#C13535" font-family="DM Mono,monospace">0.179***</text>
+          <!-- L→D -->
+          <line x1="105" y1="63" x2="194" y2="63" stroke="#1A5FA0" stroke-width="1.3" stroke-dasharray="4,2.5" marker-end="url(#mb2)"/>
+          <rect x="122" y="63" width="48" height="14" rx="3" fill="#EEF4FF"/>
+          <text x="146" y="73" text-anchor="middle" font-size="8.5" fill="#1A5FA0" font-family="DM Mono,monospace">0.078***</text>
+          <!-- D→SI new -->
+          <line x1="200" y1="65" x2="106" y2="116" stroke="#1D9E75" stroke-width="1.8" marker-end="url(#mg2)"/>
+          <rect x="128" y="85" width="50" height="14" rx="3" fill="#E8F8F2"/>
+          <text x="153" y="95" text-anchor="middle" font-size="8" fill="#0F6E56" font-family="DM Mono,monospace">★−0.060**</text>
+          <!-- SI→SRH new -->
+          <line x1="106" y1="133" x2="194" y2="133" stroke="#1D9E75" stroke-width="1.8" marker-end="url(#mg2)"/>
+          <rect x="120" y="121" width="60" height="14" rx="3" fill="#E8F8F2"/>
+          <text x="150" y="131" text-anchor="middle" font-size="8" fill="#0F6E56" font-family="DM Mono,monospace">★ +0.040**</text>
+          <!-- func lim -->
+          <rect x="10" y="164" width="280" height="26" rx="5" fill="#FEF0F0"/>
+          <rect x="10" y="164" width="4" height="26" rx="2" fill="#C13535"/>
+          <text x="155" y="181" text-anchor="middle" font-size="9.5" fill="#8A2020" font-family="DM Sans,sans-serif">Functional limitation → resilience buffer</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+
+<!-- ══ SECTION 6: METHODS ══ -->
+<section id="sec-methods">
+  <h2 class="sec-head">Methods Summary</h2>
+  <p class="sec-sub">Key design and analytic decisions.</p>
+  <div class="methods-grid">
+    <div class="method-card"><div class="method-label">Data source</div><p style="font-size:13px">CHARLS — China Health and Retirement Longitudinal Study, waves 2015, 2018, 2020. Nationally representative, adults ≥45 years. Funded by NSFC and NIA.</p></div>
+    <div class="method-card"><div class="method-label">Sample selection</div><p style="font-size:13px">Coarsened exact matching (CEM) on age, sex, education, residence. Final n=4,813 (1,966 with / 2,847 without functional limitations). Survey weights applied.</p></div>
+    <div class="method-card"><div class="method-label">Statistical model</div><p style="font-size:13px">Cross-lagged panel models (CLPM) in Mplus 8.3. Estimator: WLSMV, Theta parameterisation. Multi-group DIFFTEST for functional limitation moderation.</p></div>
+    <div class="method-card"><div class="method-label">Measures</div><p style="font-size:13px"><strong style="color:var(--teal)">L</strong> Loneliness (CESD-10 item) · <strong style="color:var(--teal)">SI</strong> Social Isolation (4-item) · <strong style="color:var(--navy)">D</strong> Depression (CESD-9) · <strong style="color:var(--plum)">H</strong> Self-rated Health (3-cat) · Functional limitation: ADL/IADL</p></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p><strong>Depression Precedes Social Disconnection More Strongly Than the Reverse</strong></p>
+  <p>Liu S, Hu SX, Hu Y, You J · Kiang Wu Nursing College of Macau · Wuhan University · CUHK</p>
+  <p style="margin-top:8px">Data: <a href="http://charls.pku.edu.cn" target="_blank" style="color:rgba(255,255,255,.6)">CHARLS (Peking University)</a> · Funded by NSSF China 24BSH129</p>
+  <p style="margin-top:6px;font-size:11px">Interactive Data Visualisation S1 · All β values are fully standardised (StdYX) from WLSMV estimation · ★ = pandemic-emergent path</p>
+</footer>
+
+<script>
+/* ══ STATE ══ */
+let period='pre', group='all', fpFilter='all';
+const TT = document.getElementById('tooltip');
+
+/* ══ TOOLTIP ENGINE ══ */
+function showTT(e, data){
+  const p = v => v >= 0 ? '+'+v.toFixed(3) : v.toFixed(3);
+  const ci_lo = (data.b - 1.96*data.se).toFixed(3);
+  const ci_hi = (data.b + 1.96*data.se).toFixed(3);
+  const pStr = data.b === 0 ? '—' :
+    Math.abs(data.b/data.se) > 3.29 ? '< .001' :
+    Math.abs(data.b/data.se) > 2.58 ? '< .01' :
+    Math.abs(data.b/data.se) > 1.96 ? '< .05' : '≥ .05 (ns)';
+  TT.innerHTML = `
+    <div class="tooltip-title" style="color:${data.col}">${data.label}</div>
+    <div class="tooltip-row"><span>β (StdYX)</span><span style="color:${data.col}">${data.b.toFixed(3)}</span></div>
+    <div class="tooltip-row"><span>SE</span><span>${data.se.toFixed(3)}</span></div>
+    <div class="tooltip-row"><span>95% CI</span><span>[${ci_lo}, ${ci_hi}]</span></div>
+    <div class="tooltip-row"><span>p-value</span><span>${pStr}</span></div>
+    ${data.note ? `<div style="margin-top:6px;font-size:11px;color:rgba(255,255,255,.6);line-height:1.4">${data.note}</div>` : ''}
+  `;
+  moveTT(e);
+  TT.classList.add('visible');
+}
+function moveTT(e){
+  const x = e.clientX + 16, y = e.clientY - 10;
+  const tw = 240, th = 140;
+  TT.style.left = (x + tw > window.innerWidth ? x - tw - 24 : x) + 'px';
+  TT.style.top  = (y + th > window.innerHeight ? y - th : y) + 'px';
+}
+function hideTT(){ TT.classList.remove('visible') }
+
+/* ══ DATA ══ */
+const DATA = {
+  pre:{
+    all:  {DL:{b:0.237,se:0.021},LD:{b:0.080,se:0.015},HL:{b:-0.047,se:0.019},LH:{b:-0.032,se:0.016,ns:true},DI:null,IH:null},
+    lim:  {DL:{b:0.246,se:0.022},LD:{b:0.080,se:0.016},HL:{b:-0.048,se:0.020},LH:{b:-0.030,se:0.017,ns:true},DI:null,IH:null},
+    nolim:{DL:{b:0.218,se:0.020},LD:{b:0.076,se:0.015},HL:{b:-0.045,se:0.019},LH:{b:-0.031,se:0.017,ns:true},DI:null,IH:null},
+  },
+  pan:{
+    all:  {DL:{b:0.179,se:0.024},LD:{b:0.078,se:0.020},HL:{b:-0.077,se:0.020},LH:{b:0.036,se:0.021,ns:true},DI:{b:-0.060,se:0.018},IH:{b:0.040,se:0.015}},
+    lim:  {DL:{b:0.173,se:0.024},LD:{b:0.101,se:0.021},HL:{b:-0.080,se:0.021},LH:{b:0.034,se:0.021,ns:true},DI:{b:-0.058,se:0.018},IH:{b:0.038,se:0.015}},
+    nolim:{DL:{b:0.156,se:0.023},LD:{b:0.107,se:0.021},HL:{b:-0.074,se:0.020},LH:{b:0.035,se:0.021,ns:false},DI:{b:-0.055,se:0.018},IH:{b:0.039,se:0.015}},
+  },
+};
+
+/* ══ CLPM DIAGRAM ══ */
+function drawCLPM(){
+  const svg = document.getElementById('clpm-svg');
+  const d = DATA[period][group];
+  const W=720, H=360;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.innerHTML='';
+
+  const L={x:130,y:110}, SI={x:130,y:260}, D={x:590,y:110}, SRH={x:590,y:260};
+  const NW=112, NH=42;
+
+  /* defs */
+  const defs = document.createElementNS('http://www.w3.org/2000/svg','defs');
+  [['ar','#C13535'],['ab','#1A5FA0'],['ao','#C4641C'],['ag','#1D9E75'],['agr','#888780']].forEach(([id,col])=>{
+    const mk = document.createElementNS('http://www.w3.org/2000/svg','marker');
+    mk.setAttribute('id',id); mk.setAttribute('markerWidth','7'); mk.setAttribute('markerHeight','7');
+    mk.setAttribute('refX','6'); mk.setAttribute('refY','3.5'); mk.setAttribute('orient','auto');
+    const ph = document.createElementNS('http://www.w3.org/2000/svg','path');
+    ph.setAttribute('d','M0,0.5 L6,3.5 L0,6.5 Z'); ph.setAttribute('fill',col);
+    mk.appendChild(ph); defs.appendChild(mk);
+  });
+  svg.appendChild(defs);
+
+  /* bg */
+  const bg = document.createElementNS('http://www.w3.org/2000/svg','rect');
+  Object.entries({x:0,y:0,width:W,height:H,fill:'#FAFAF8',rx:10}).forEach(([k,v])=>bg.setAttribute(k,v));
+  svg.appendChild(bg);
+
+  /* badge */
+  const pCol = period==='pre'?'#1A5FA0':'#C13535';
+  const pLab = period==='pre'?'Pre-pandemic · 2015→2018':'Pandemic transition · 2018→2020';
+  const gLab = group==='all'?'Full sample (n=4,813)':group==='lim'?'With functional limitation (n=1,966)':'Without functional limitation (n=2,847)';
+  addSvgRect(svg,12,10,226,24,5,pCol+'22');
+  addSvgText(svg,125,26,pLab,{size:11,weight:'500',fill:pCol});
+  addSvgRect(svg,450,10,260,24,5,'#88878022');
+  addSvgText(svg,580,26,gLab,{size:11,fill:'#555'});
+
+  /* ratio annotation */
+  const ratio = (d.DL.b/d.LD.b).toFixed(2);
+  addSvgRect(svg, W/2-72, L.y-30, 144, 22, 11, '#FEF0F0', '#E0A0A0', 0.8);
+  addSvgText(svg, W/2, L.y-15, `D→L is ${ratio}× stronger than L→D`, {size:10.5,weight:'500',fill:'#C13535'});
+
+  /* helper: arrow with hit area for tooltip */
+  function addArrow(x1,y1,x2,y2,col,sw,dash,markId,pathData){
+    const dx=x2-x1,dy=y2-y1,len=Math.sqrt(dx*dx+dy*dy)||1;
+    const ux=dx/len,uy=dy/len;
+    const ex=x2-ux*7,ey=y2-uy*7;
+    // visible line
+    const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',x1);ln.setAttribute('y1',y1);ln.setAttribute('x2',ex);ln.setAttribute('y2',ey);
+    ln.setAttribute('stroke',col);ln.setAttribute('stroke-width',sw);
+    if(dash) ln.setAttribute('stroke-dasharray',dash);
+    ln.setAttribute('marker-end',`url(#${markId})`);
+    svg.appendChild(ln);
+    // transparent hit area
+    const hit=document.createElementNS('http://www.w3.org/2000/svg','line');
+    hit.setAttribute('x1',x1);hit.setAttribute('y1',y1);hit.setAttribute('x2',ex);hit.setAttribute('y2',ey);
+    hit.setAttribute('stroke','transparent');hit.setAttribute('stroke-width','16');
+    hit.style.cursor='crosshair';
+    hit.addEventListener('mouseenter',e=>showTT(e,pathData));
+    hit.addEventListener('mousemove',moveTT);
+    hit.addEventListener('mouseleave',hideTT);
+    svg.appendChild(hit);
+    // label
+    const mx=(x1+ex)/2, my=(y1+ey)/2;
+    const px2=-uy*18,py2=ux*18;
+    const lw = (pathData.b.toFixed(3)+'***').length*5.5+8;
+    addSvgRect(svg,mx+px2-lw/2,my+py2-7,lw,15,3,'#F5F3EE');
+    const ns = pathData.ns;
+    const stars = Math.abs(pathData.b/pathData.se)>3.29?'***':Math.abs(pathData.b/pathData.se)>2.58?'**':Math.abs(pathData.b/pathData.se)>1.96?'*':' ns';
+    addSvgText(svg,mx+px2,my+py2+1,pathData.b.toFixed(3)+(ns?'':stars),{size:9.5,weight:sw>2?'500':'400',fill:col,mono:true});
+  }
+
+  /* edges */
+  const Le={x:L.x+NW/2,y:L.y}, Lw={x:L.x-NW/2,y:L.y};
+  const Lb={x:L.x,y:L.y+NH/2};
+  const Dw={x:D.x-NW/2,y:D.y}, Db={x:D.x,y:D.y+NH/2};
+  const SIr={x:SI.x+NW/2,y:SI.y}, SIt={x:SI.x,y:SI.y-NH/2};
+  const SRw={x:SRH.x-NW/2,y:SRH.y}, SRt={x:SRH.x,y:SRH.y-NH/2};
+
+  /* D→L */
+  addArrow(Dw.x,Dw.y-8,Le.x,Le.y-8,'#C13535',2.8,'','ar',{...d.DL,col:'#C13535',label:'D → Loneliness',note:'Primary dominant pathway — depression predicts subsequent loneliness'});
+  /* L→D */
+  addArrow(Le.x,Le.y+8,Dw.x,Dw.y+8,'#1A5FA0',1.4,'5,3','ab',{...d.LD,col:'#1A5FA0',label:'Loneliness → D',note:'Reverse pathway — significantly weaker than D→L'});
+  /* SRH→L */
+  addArrow(SRw.x,SRH.y-8,L.x+30,Lb.y,'#C4641C',1.2,'3,2','ao',{...d.HL,col:'#C4641C',label:'SRH → Loneliness',note:'Better self-rated health predicts less subsequent loneliness'});
+  /* L→SRH */
+  const lhData = {...d.LH,col:'#888780',label:'Loneliness → SRH',note:'Non-significant in most specifications'};
+  addArrow(L.x-20,Lb.y,SRw.x-10,SRt.y,'#888780',1,'5,4','agr',lhData);
+
+  /* pandemic paths */
+  if(d.DI){
+    addArrow(Db.x,Db.y,SIr.x,SIt.y,'#1D9E75',1.8,'','ag',{...d.DI,col:'#1D9E75',label:'★ D → Social Isolation',note:'Pandemic-emergent: depression reduces social isolation, possibly via family mobilisation'});
+    addArrow(SIr.x,SI.y-6,SRw.x,SRH.y-6,'#1D9E75',1.8,'','ag',{...d.IH,col:'#1D9E75',label:'★ Social Isolation → SRH',note:'Pandemic-emergent: isolation may reduce infection exposure, protecting physical health'});
+  }
+
+  /* nodes */
+  [{n:L,lbl:'L',sub:'Loneliness',col:'#2D7868'},{n:SI,lbl:'SI',sub:'Social Isolation',col:'#2D7868'},
+   {n:D,lbl:'D',sub:'Dep. Symptoms',col:'#1F3864'},{n:SRH,lbl:'H',sub:'Self-rated Health',col:'#7A4E72'}]
+  .forEach(({n,lbl,sub,col})=>{
+    addSvgRect(svg,n.x-NW/2+2,n.y-NH/2+2,NW,NH,6,'#0000001A');
+    addSvgRect(svg,n.x-NW/2,n.y-NH/2,NW,NH,6,col);
+    addSvgText(svg,n.x,n.y-5,lbl,{size:12,weight:'500',fill:'#fff'});
+    addSvgText(svg,n.x,n.y+9,sub,{size:9,fill:'rgba(255,255,255,.75)'});
+  });
+}
+
+/* ══ SVG HELPERS ══ */
+function addSvgRect(svg,x,y,w,h,rx,fill,stroke,sw){
+  const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  Object.entries({x,y,width:w,height:h,rx,fill}).forEach(([k,v])=>r.setAttribute(k,v));
+  if(stroke){r.setAttribute('stroke',stroke);r.setAttribute('stroke-width',sw||1);}
+  svg.appendChild(r); return r;
+}
+function addSvgText(svg,x,y,str,opts={}){
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x); t.setAttribute('y',y);
+  t.setAttribute('text-anchor',opts.anchor||'middle');
+  t.setAttribute('dominant-baseline','auto');
+  t.setAttribute('font-size',opts.size||12);
+  t.setAttribute('font-weight',opts.weight||'400');
+  t.setAttribute('fill',opts.fill||'#1A1816');
+  t.setAttribute('font-family', opts.mono ? 'DM Mono,monospace' : 'DM Sans,sans-serif');
+  t.textContent=str; svg.appendChild(t); return t;
+}
+
+/* ══ FOREST PLOT ══ */
+const FP_DATA = [
+  {id:'pre-DL',period:'pre',type:'focal', label:'D → Loneliness',       p1:0.237,se1:0.021,p2:0.239,se2:0.014,col:'#C13535',dom:true},
+  {id:'pre-LD',period:'pre',type:'focal', label:'L → Depression',        p1:0.080,se1:0.015,p2:0.044,se2:0.010,col:'#1A5FA0'},
+  {id:'pre-HL',period:'pre',type:'other', label:'SRH → Loneliness',      p1:-0.047,se1:0.019,p2:-0.068,se2:0.013,col:'#C4641C'},
+  {id:'pre-LH',period:'pre',type:'other', label:'L → SRH',               p1:-0.032,se1:0.016,p2:-0.003,se2:0.011,col:'#888780',ns1:true,ns2:true},
+  {id:'pan-DL',period:'pan',type:'focal', label:'D → Loneliness',        p1:0.179,se1:0.024,p2:0.141,se2:0.017,col:'#C13535',dom:true},
+  {id:'pan-LD',period:'pan',type:'focal', label:'L → Depression',        p1:0.078,se1:0.020,p2:0.164,se2:0.015,col:'#1A5FA0'},
+  {id:'pan-HL',period:'pan',type:'other', label:'SRH → Loneliness',      p1:-0.077,se1:0.020,p2:-0.087,se2:0.015,col:'#C4641C'},
+  {id:'pan-LH',period:'pan',type:'other', label:'L → SRH',               p1:0.036, se1:0.021,p2:-0.041,se2:0.016,col:'#888780',ns1:true},
+  {id:'pan-DI',period:'pan',type:'emerg', label:'★ D → Soc. Isolation',  p1:-0.060,se1:0.018,p2:-0.082,se2:0.013,col:'#1D9E75',emerg:true},
+  {id:'pan-IH',period:'pan',type:'emerg', label:'★ Soc. Isolation → SRH',p1:0.040, se1:0.015,p2:0.021, se2:0.011,col:'#1D9E75',emerg:true,ns2:true},
+];
+
+function drawForest(){
+  const svg = document.getElementById('fp-svg');
+  const visible = FP_DATA.filter(r=>{
+    if(fpFilter==='all') return true;
+    if(fpFilter==='pre') return r.period==='pre';
+    if(fpFilter==='pan') return r.period==='pan';
+    if(fpFilter==='focal') return r.type==='focal';
+    return true;
+  });
+
+  const W=720, LW=198, RW=96, plotW=W-LW-RW;
+  const xMin=-0.24, xMax=0.44;
+  const rowH=38, secH=28, padTop=12;
+  const xPx=v=>LW+(v-xMin)/(xMax-xMin)*plotW;
+  svg.innerHTML='';
+
+  /* defs */
+  const defs=document.createElementNS('http://www.w3.org/2000/svg','defs');
+  svg.appendChild(defs);
+
+  let y=padTop;
+  let lastPeriod='';
+
+  visible.forEach((r,i)=>{
+    /* section header */
+    if(r.period!==lastPeriod && fpFilter==='all'){
+      lastPeriod=r.period;
+      const secLab = r.period==='pre'?'Pre-pandemic  (Wave 1→2, 2015–2018)':'Pandemic transition  (Wave 2→3, 2018–2020)';
+      addSvgRect(svg,0,y+1,W,secH-2,3,'#F0EDE6');
+      addSvgText(svg,LW-8,y+secH*.72,secLab,{size:11,weight:'500',fill:'#2A2A28',anchor:'end'});
+      y+=secH;
+    }
+
+    const cy=y+rowH/2;
+    if(i%2===0) addSvgRect(svg,LW,y,plotW+RW,rowH,0,'#F8F6F2');
+
+    /* row label */
+    addSvgText(svg,LW-8,cy+4,r.label,{size:12,fill:r.emerg?'#0F6E56':'#2A2A28',anchor:'end'});
+
+    const yp=cy-6, ys=cy+6;
+
+    function fpDot(p,se,yy,filled,nsFlag,sample){
+      const ci=1.96*se,lo=xPx(p-ci),hi=xPx(p+ci),cx2=xPx(p);
+      const op=nsFlag?0.38:1;
+      const dash=filled?null:[4,3];
+      const sw=filled?2:1.3;
+      // CI line
+      const ln=document.createElementNS('http://www.w3.org/2000/svg','line');
+      ln.setAttribute('x1',lo);ln.setAttribute('y1',yy);ln.setAttribute('x2',hi);ln.setAttribute('y2',yy);
+      ln.setAttribute('stroke',r.col);ln.setAttribute('stroke-width',sw.toString());
+      if(dash) ln.setAttribute('stroke-dasharray',dash.join(','));
+      ln.setAttribute('opacity',op.toString());
+      svg.appendChild(ln);
+      // tick ends
+      [-3,3].forEach(d=>{
+        const t=document.createElementNS('http://www.w3.org/2000/svg','line');
+        t.setAttribute('x1',lo);t.setAttribute('y1',yy+d);t.setAttribute('x2',lo);t.setAttribute('y2',yy-d);
+        t.setAttribute('stroke',r.col);t.setAttribute('stroke-width','1');t.setAttribute('opacity',op.toString());
+        svg.appendChild(t);
+        const t2=document.createElementNS('http://www.w3.org/2000/svg','line');
+        t2.setAttribute('x1',hi);t2.setAttribute('y1',yy+d);t2.setAttribute('x2',hi);t2.setAttribute('y2',yy-d);
+        t2.setAttribute('stroke',r.col);t2.setAttribute('stroke-width','1');t2.setAttribute('opacity',op.toString());
+        svg.appendChild(t2);
+      });
+      // dot
+      const dot=document.createElementNS('http://www.w3.org/2000/svg','circle');
+      dot.setAttribute('cx',cx2);dot.setAttribute('cy',yy);dot.setAttribute('r','5.5');
+      dot.setAttribute('opacity',op.toString());
+      if(filled){ dot.setAttribute('fill',r.col); }
+      else { dot.setAttribute('fill','white'); dot.setAttribute('stroke',r.col); dot.setAttribute('stroke-width','1.8'); }
+      dot.style.cursor='crosshair';
+      const stars=Math.abs(p/se)>3.29?'***':Math.abs(p/se)>2.58?'**':Math.abs(p/se)>1.96?'*':' ns';
+      const ttData={b:p,se,col:r.col,label:`${r.label} (${sample})`,
+        note:`95% CI: [${(p-ci).toFixed(3)}, ${(p+ci).toFixed(3)}]`};
+      dot.addEventListener('mouseenter',e=>showTT(e,ttData));
+      dot.addEventListener('mousemove',moveTT);
+      dot.addEventListener('mouseleave',hideTT);
+      svg.appendChild(dot);
+    }
+
+    fpDot(r.p1,r.se1,yp,true, r.ns1||false,'Primary n=4,813');
+    fpDot(r.p2,r.se2,ys,false,r.ns2||false,'Sensitivity n=21,712');
+
+    /* values */
+    const c1=r.ns1?'#AAA':'#2A2A28', c2=r.ns2?'#AAA':'#666';
+    const b1=(r.p1>=0?' ':'')+r.p1.toFixed(3);
+    const b2=(r.p2>=0?' ':'')+r.p2.toFixed(3);
+    addSvgText(svg,W-RW+6,yp+4,b1,{size:10.5,fill:c1,anchor:'start',mono:true});
+    addSvgText(svg,W-RW+6,ys+4,b2,{size:10.5,fill:c2,anchor:'start',mono:true});
+    y+=rowH;
+  });
+
+  const totalH=y+46;
+  svg.setAttribute('viewBox',`0 0 ${W} ${totalH}`);
+
+  /* axis */
+  const axY=y+10;
+  [-0.2,-0.1,0,0.1,0.2,0.3,0.4].forEach(t=>{
+    const tx=xPx(t);
+    const gridLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+    gridLine.setAttribute('x1',tx);gridLine.setAttribute('y1',padTop);gridLine.setAttribute('x2',tx);gridLine.setAttribute('y2',axY);
+    gridLine.setAttribute('stroke',t===0?'#2A2A28':'#D5D2CB');
+    gridLine.setAttribute('stroke-width',t===0?'1.2':'0.5');
+    if(t!==0) gridLine.setAttribute('stroke-dasharray','3,3');
+    svg.appendChild(gridLine);
+    addSvgText(svg,tx,axY+14,t.toFixed(1),{size:11,fill:'#888',mono:true});
+  });
+  addSvgText(svg,LW+plotW/2,axY+28,'Standardised coefficient β (StdYX)',{size:11,fill:'#888'});
+  addSvgText(svg,W-RW+6,axY+14,'primary',{size:10,fill:'#AAA',anchor:'start'});
+  addSvgText(svg,W-RW+6,axY+26,'sensitivity',{size:10,fill:'#AAA',anchor:'start'});
+  const leftBorder=document.createElementNS('http://www.w3.org/2000/svg','line');
+  leftBorder.setAttribute('x1',LW);leftBorder.setAttribute('y1',padTop);leftBorder.setAttribute('x2',LW);leftBorder.setAttribute('y2',axY);
+  leftBorder.setAttribute('stroke','#D5D2CB');leftBorder.setAttribute('stroke-width','0.5');
+  svg.appendChild(leftBorder);
+}
+
+/* ══ CONTROLS ══ */
+function setPeriod(p,btn){
+  period=p;
+  document.querySelectorAll('#tg-period .tg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawCLPM();
+}
+function setGroup(g,btn){
+  group=g;
+  document.querySelectorAll('#tg-group .tg-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawCLPM();
+}
+function setFPFilter(f,btn){
+  fpFilter=f;
+  document.querySelectorAll('.fp-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  drawForest();
+}
+function navTo(id){ document.getElementById(id).scrollIntoView({behavior:'smooth'}) }
+
+/* ══ SCROLL SPY ══ */
+const sections=['sec-clpm','sec-findings','sec-forest','sec-fit','sec-mech','sec-methods'];
+const navBtns=document.querySelectorAll('.nav-btn');
+window.addEventListener('scroll',()=>{
+  let active=0;
+  sections.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el&&el.getBoundingClientRect().top<130) active=i;
+  });
+  navBtns.forEach((b,i)=>b.classList.toggle('active',i===active));
+},{passive:true});
+
+/* ══ INIT ══ */
+drawCLPM();
+drawForest();
+</script>
+</body>
+</html>
